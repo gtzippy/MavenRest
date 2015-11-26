@@ -14,9 +14,10 @@ import javax.ws.rs.core.Application;
  */
 @javax.ws.rs.ApplicationPath("api")
 public class ApplicationConfig extends Application {
-
+    
     @Override
     public Set<Class<?>> getClasses() {
+        //InteractionLayer.Instance();
         Set<Class<?>> resources = new java.util.HashSet<>();
         addRestResourceClasses(resources);
         return resources;
@@ -29,8 +30,14 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
-        resources.add(edu.gatech.sad.project4.GetProfessorResource.class);
-        resources.add(edu.gatech.sad.project4.GetStudentResource.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetAllCoursesResource.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetAllPreferenceForStudentResource.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetAllProfessorsResource.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetAllTasResource.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetCourseResource.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetProfessorResource.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetStudentPreference.class);
+        resources.add(edu.gatech.sad.project4.Resources.GetStudentResource.class);
     }
     
 }

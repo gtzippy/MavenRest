@@ -29,7 +29,7 @@ import javax.ws.rs.core.Response;
  * @author smithda
  */
 @Path("/getStudent")
-public class GetStudentResource {
+public class GetStudentResource extends ResourceBase{
 
     @Context
     private UriInfo context;

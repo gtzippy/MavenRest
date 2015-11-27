@@ -42,7 +42,7 @@ public class GetStudentPreference extends ResourceBase{
      * Retrieves representation of an instance of edu.gatech.sad.project4.Resources.GetStudentPreference
      * @return an instance of javax.ws.rs.core.Response
      */
-        @GET
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{studentPreferenceId}")
     public Response getJson(@PathParam("studentPreferenceId") int studentPreferenceId) {
@@ -50,7 +50,6 @@ public class GetStudentPreference extends ResourceBase{
             InteractionLayer iLayer = InteractionLayer.Instance();
             Studentpreferencestable spt = iLayer.getStudentPreference(studentPreferenceId);
             return Response.ok(mapper.writeValueAsString(spt)).build();
-            //TODO return proper representation object
         } catch (JsonProcessingException ex) {
             Logger.getLogger(GetStudentPreference.class.getName()).log(Level.SEVERE, null, ex);
             return Response.noContent().type(ex.getMessage()).build();

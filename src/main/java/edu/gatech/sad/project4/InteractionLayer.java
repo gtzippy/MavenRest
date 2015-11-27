@@ -13,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
 
 import edu.gatech.sad.project4.entities.Administratortable;
@@ -22,7 +21,6 @@ import edu.gatech.sad.project4.entities.Coursetable;
 import edu.gatech.sad.project4.hometables.CoursetableHome;
 import edu.gatech.sad.project4.entities.Offeredcoursestable;
 import edu.gatech.sad.project4.entities.Processingstatustable;
-import edu.gatech.sad.project4.entities.Professorcourseassignmenttable;
 import edu.gatech.sad.project4.entities.Professorstable;
 import edu.gatech.sad.project4.hometables.ProfessorstableHome;
 import edu.gatech.sad.project4.entities.Studentcourseassignmenttable;
@@ -31,8 +29,6 @@ import edu.gatech.sad.project4.hometables.StudentpreferencestableHome;
 import edu.gatech.sad.project4.entities.Studenttable;
 import edu.gatech.sad.project4.hometables.StudenttableHome;
 import edu.gatech.sad.project4.entities.Tacourseassignmenttable;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 
 public class InteractionLayer {
 
@@ -194,15 +190,16 @@ public class InteractionLayer {
         StudentpreferencestableHome spsHome = new StudentpreferencestableHome();
         Studentpreferencestable student = spsHome.findById(preferenceId);
         List<String> coursesToAdd = convertStringToList(courses);
-        List<String> currentCourses = convertStringToList(student.getCourses());
+        List<String> currentCourses = new ArrayList<String>();
+        currentCourses.addAll(convertStringToList(student.getCourses()));
         for (String c : coursesToAdd) {
             if (!currentCourses.contains(c) && isValidCourse(courseTableList, c)) {
                 currentCourses.add(c);
             }
         }
         String newCourseList = String.join(",", currentCourses);
+        newCourseList = newCourseList.startsWith(",") ? newCourseList.substring(1) : newCourseList;
         student.setCourses(newCourseList);
-        spsHome.persist(student);
         transaction.commit();
         engineCall();
     }
@@ -213,14 +210,15 @@ public class InteractionLayer {
      * @param courses courses to remove
      * @param preferenceId preference id
      */
-    public void removeCoursesFromStudentpreferencetable(String courses, Integer preferenceId) {
+    public void removeCoursesFromStudentpreferencetable(String courses, Integer preferenceId) throws NullPointerException{
         List<Coursetable> courseTableList = getCourseCatalog();
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudentpreferencestableHome spsHome = new StudentpreferencestableHome();
         Studentpreferencestable student = spsHome.findById(preferenceId);
         List<String> coursesToRemove = convertStringToList(courses);
-        List<String> currentCourses = convertStringToList(student.getCourses());
+        List<String> currentCourses = new ArrayList<String>();
+        currentCourses.addAll(convertStringToList(student.getCourses()));
         for (String c : coursesToRemove) {
             if (currentCourses.contains(c)) {
                 currentCourses.remove(c);
@@ -240,15 +238,13 @@ public class InteractionLayer {
      * @param courses desired courses
      * @param numCoursesDesired number of courses desired
      */
-    public void addNewStudentpreference(Integer studentId, String courses, Integer numCoursesDesired) {
+    public void addNewStudentpreference(String courses, Integer numCoursesDesired) {
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudentpreferencestableHome spsHome = new StudentpreferencestableHome();
         Studentpreferencestable student = new Studentpreferencestable();
-        student.setStudentId(studentId);
         student.setCourses(courses);
         student.setNumCoursesDesired(numCoursesDesired);
-        //student.setDate(new Date());
         spsHome.persist(student);
         transaction.commit();
         engineCall();
@@ -259,7 +255,7 @@ public class InteractionLayer {
      *
      * @param preferenceId preference id
      */
-    public void deleteStudentpreference(Integer preferenceId) {
+    public void removeStudentpreference(Integer preferenceId) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudentpreferencestableHome spsHome = new StudentpreferencestableHome();
@@ -274,12 +270,12 @@ public class InteractionLayer {
      *
      * @param preferenceId preference id
      */
-    public void clearAllStudentpreferenceCourses(Integer preferenceId) {
+    public void clearAllStudentpreferenceCourses(Integer preferenceId) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudentpreferencestableHome spsHome = new StudentpreferencestableHome();
         Studentpreferencestable student = spsHome.findById(preferenceId);
-        String emptyCourseList = String.join(",", new ArrayList<String>());
+        String emptyCourseList = "";
         student.setCourses(emptyCourseList);
         spsHome.persist(student);
         transaction.commit();
@@ -292,7 +288,7 @@ public class InteractionLayer {
      * @param taWeighting ta weighting
      * @param courseCode course code
      */
-    public void assignTaWeightingToCourse(Integer taWeighting, String courseCode) {
+    public void assignTaWeightingToCourse(Integer taWeighting, String courseCode) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         CoursetableHome cat = new CoursetableHome();
@@ -310,7 +306,7 @@ public class InteractionLayer {
      * @param enrollmentLimit enrollment limit
      * @param courseCode coures code
      */
-    public void assignEnrollmentLimitToCourse(Integer enrollmentLimit, String courseCode) {
+    public void assignEnrollmentLimitToCourse(Integer enrollmentLimit, String courseCode) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         CoursetableHome cat = new CoursetableHome();
@@ -326,10 +322,10 @@ public class InteractionLayer {
      * adds valid proficiencies to a professor. A valid proficiency is define as
      * being found in teh course catalog
      *
-     * @param courseId
+     * @param courseCodes
      * @param professorId
      */
-    public void addProfessorProficiency(String courseId, Integer professorId) {
+    public void addProfessorProficiency(String courseCodes, Integer professorId) throws NullPointerException{
         List<Coursetable> validCourses = getCourseCatalog();
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
@@ -338,7 +334,7 @@ public class InteractionLayer {
         String courses = professor.getCourses();
         List<String> currentProficiencey = new ArrayList<String>();
         currentProficiencey.addAll(convertStringToList(courses));
-        List<String> newProficiencies = convertStringToList(courseId);
+        List<String> newProficiencies = convertStringToList(courseCodes);
         for (String c : newProficiencies) {
             if (!currentProficiencey.contains(c) && isValidCourse(validCourses, c)) {
                 currentProficiencey.add(c);
@@ -358,7 +354,7 @@ public class InteractionLayer {
      * @param professorId professor id
      * @param courseId course id
      */
-    public void removeProfessorProficiency(Integer professorId, String courseId) {
+    public void removeProfessorProficiency(String courseId, Integer professorId) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         ProfessorstableHome ptHome = new ProfessorstableHome();
@@ -385,7 +381,7 @@ public class InteractionLayer {
      *
      * @param professorId
      */
-    public void clearProfessorProficiency(Integer professorId) {
+    public void clearProfessorProficiency(Integer professorId) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         ProfessorstableHome ptHome = new ProfessorstableHome();
@@ -402,7 +398,7 @@ public class InteractionLayer {
      * @param ta ta flag: 1 = ta, 0 = not a ta
      * @param studentId student id
      */
-    public void setStudentTa(Integer ta, Integer studentId) {
+    public void setStudentTa(Integer ta, Integer studentId) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudenttableHome sth = new StudenttableHome();
@@ -424,7 +420,7 @@ public class InteractionLayer {
      * @param courseCode course code
      * @param studentId student id
      */
-    public void addCourseCompleteToStudent(String courseCode, Integer studentId) {
+    public void addCourseCompleteToStudent(String courseCode, Integer studentId) throws NullPointerException{
         List<Coursetable> courseList = getCourseCatalog();
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
@@ -451,7 +447,7 @@ public class InteractionLayer {
      *
      * @param studentId student id
      */
-    public void removeStudent(Integer studentId) {
+    public void removeStudent(Integer studentId) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudenttableHome sth = new StudenttableHome();
@@ -466,7 +462,7 @@ public class InteractionLayer {
      *
      * @param professorId professor id
      */
-    public void removeProfessor(Integer professorId) {
+    public void removeProfessor(Integer professorId) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         ProfessorstableHome pth = new ProfessorstableHome();
@@ -482,7 +478,7 @@ public class InteractionLayer {
      * @param studentId student id
      * @param newPassword new password
      */
-    public void changeStudentPassword(Integer studentId, String newPassword) {
+    public void changeStudentPassword(Integer studentId, String newPassword) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudenttableHome sth = new StudenttableHome();
@@ -500,7 +496,7 @@ public class InteractionLayer {
      * @param administratorId administratorId
      * @param newPassword new password
      */
-    public void changeAdministratorPassword(Integer administratorId, String newPassword) {
+    public void changeAdministratorPassword(Integer administratorId, String newPassword) throws NullPointerException{
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         AdministratortableHome ath = new AdministratortableHome();
@@ -517,7 +513,7 @@ public class InteractionLayer {
      * @param name student name
      * @param password student password
      */
-    public void addStudent(String name, String password) {
+    public void addNewStudent(String name, String password) {
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         StudenttableHome sth = new StudenttableHome();
@@ -535,7 +531,7 @@ public class InteractionLayer {
      *
      * @param name professor name
      */
-    public void addProfessor(String name) {
+    public void addNewProfessor(String name) {
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         ProfessorstableHome pth = new ProfessorstableHome();
@@ -569,7 +565,7 @@ public class InteractionLayer {
      * @param courseCode course code
      * @return list of student ids
      */
-    public List<Integer> getStudentsInCourse(String courseCode) {
+    public List<Integer> getStudentsInCourse(String courseCode) throws NullPointerException{
         List<Integer> studentIds = new ArrayList<Integer>();
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
@@ -586,13 +582,13 @@ public class InteractionLayer {
      *
      * @return Processingstatustable fields as strings
      */
-    public String getLatestCompleteProcessingstatustableEntry() {
+    public Processingstatustable getLatestCompleteProcessingstatustableEntry() {
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
         List<Processingstatustable> pstList = s.createCriteria(Processingstatustable.class).add(Restrictions.like("completed", 1)).list();
         Processingstatustable pst = pstList.get(pstList.size() + 1);
         transaction.rollback();
-        return pst.toString();
+        return pst;
     }
 
     /**
@@ -601,7 +597,7 @@ public class InteractionLayer {
      * @param courseCode courseCode
      * @return list of studentIds for tas
      */
-    public List<Integer> getAllTasForCourse(String courseCode) {
+    public List<Integer> getAllTasForCourse(String courseCode) throws NullPointerException{
         List<Integer> taList = new ArrayList<Integer>();
         Session s = sess.getCurrentSession();
         Transaction transaction = s.beginTransaction();
@@ -615,6 +611,7 @@ public class InteractionLayer {
 
     /**
      * returns list of all student TAs
+     * @return 
      */
     public List<Integer> getAllTas() {
         List<Integer> taList = new ArrayList<Integer>();

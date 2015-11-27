@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
  * @author Daniel
  */
 @Path("/GetCourse")
-public class GetCourseResource extends ResourceBase {
+public class GetCourseResource extends ResourceBase{
 
     @Context
     private UriInfo context;

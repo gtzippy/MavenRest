@@ -5,11 +5,7 @@
  */
 package edu.gatech.sad.project4.Resources;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.gatech.sad.project4.InteractionLayer;
-import static edu.gatech.sad.project4.Resources.ResourceBase.mapper;
-import edu.gatech.sad.project4.entities.Coursetable;
-import edu.gatech.sad.project4.entities.Studenttable;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,7 +25,7 @@ import javax.ws.rs.core.Response;
  * @author Daniel
  */
 @Path("/getAllTas")
-public class GetAllTasResource {
+public class GetAllTasResource extends ResourceBase{
 
     @Context
     private UriInfo context;

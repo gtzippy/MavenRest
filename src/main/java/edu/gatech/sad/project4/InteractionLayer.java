@@ -197,7 +197,8 @@ public class InteractionLayer {
                 currentCourses.add(c);
             }
         }
-        String newCourseList = String.join(",", currentCourses);
+        String newCourseList = stringJoin(currentCourses);
+        //String newCourseList = String.join(",", currentCourses);
         newCourseList = newCourseList.startsWith(",") ? newCourseList.substring(1) : newCourseList;
         student.setCourses(newCourseList);
         transaction.commit();
@@ -224,7 +225,8 @@ public class InteractionLayer {
                 currentCourses.remove(c);
             }
         }
-        String newCourseList = String.join(",", currentCourses);
+        String newCourseList = stringJoin(currentCourses);
+        //String newCourseList = String.join(",", currentCourses);
         student.setCourses(newCourseList);
         spsHome.persist(student);
         transaction.commit();
@@ -340,7 +342,8 @@ public class InteractionLayer {
                 currentProficiencey.add(c);
             }
         }
-        courses = String.join(",", currentProficiencey);
+        courses = stringJoin(currentProficiencey);
+        //courses = String.join(",", currentProficiencey);
         professor.setCourses(courses);
         ptHome.persist(professor);
         log.info(professor);
@@ -368,7 +371,8 @@ public class InteractionLayer {
                 currentProficiencey.remove(c);
             }
         }
-        courses = String.join(",", currentProficiencey);
+        courses = stringJoin(currentProficiencey);
+        //courses = String.join(",", currentProficiencey);
         professor.setCourses(courses);
         ptHome.persist(professor);
         log.info(professor);
@@ -434,7 +438,8 @@ public class InteractionLayer {
                 coursesTaken.add(c);
             }
         }
-        String updatedCourses = String.join(",", coursesTaken);
+        String updatedCourses = stringJoin(coursesTaken);
+        //String updatedCourses = String.join(",", coursesTaken);
         student.setTakenCourses(updatedCourses);
         sth.persist(student);
         log.info(student);
@@ -653,6 +658,16 @@ public class InteractionLayer {
             validCourseCodes.add(c.getCourseCode());
         }
         return validCourseCodes.contains(courseCode);
+    }
+    
+    private String stringJoin(List<String> list){
+    	String delim = "";
+    	StringBuilder sb = null;
+    	for (String e: list){
+    		sb.append(delim).append(e);
+    		delim = ",";
+    	}
+    	return sb.toString();
     }
 
     private void engineCall() {

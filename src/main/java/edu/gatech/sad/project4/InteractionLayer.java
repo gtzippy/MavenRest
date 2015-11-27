@@ -662,7 +662,10 @@ public class InteractionLayer {
     
     private String stringJoin(List<String> list){
     	String delim = "";
-    	StringBuilder sb = null;
+        if(list.get(0).trim().length()==0){
+            list.remove(list.get(0));
+        }
+    	StringBuilder sb = new StringBuilder();
     	for (String e: list){
     		sb.append(delim).append(e);
     		delim = ",";
